@@ -2,6 +2,7 @@ import yfinance as yf
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+import plotly.graph_objects as go
 from datetime import datetime
 
 def fetch_stock_data(ticker, start_date, end_date):
@@ -66,7 +67,7 @@ def plot_strategy(data, signals, success_rate):
     ax1.plot(signals.loc[signals['Positions'] == -1].index, data['Close'][signals['Positions'] == -1], 'v', markersize=10, color='r', label='Sell signal')
 
     ax1.set_ylabel('Price')
-    ax1.set_title('Stock Price, Moving Averages & Buy/Sell Signals\nPrediction Success Rate: {:.2%}'.format(success_rate))
+    ax1.set_title(ticker +' Stock Price, Moving Averages & Buy/Sell Signals\nPrediction Success Rate: {:.2%}'.format(success_rate))
     ax1.legend(loc='best')
     plt.xlabel('Date')
     plt.show()
