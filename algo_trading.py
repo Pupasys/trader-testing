@@ -2,14 +2,15 @@ import yfinance as yf
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+from datetime import datetime
 
 def fetch_stock_data(ticker, start_date, end_date):
     stock_data = yf.download(ticker, start=start_date, end=end_date)
     return stock_data
 
 ticker = 'AMZN'  # You can replace this with any stock symbol you prefer
-start_date = '2020-01-01'
-end_date = '2021-01-01'
+start_date = datetime(1900, 1, 1)  # Change the start date to January 1, 1900
+end_date = datetime.now()
 
 stock_data = fetch_stock_data(ticker, start_date, end_date)
 
@@ -33,7 +34,24 @@ long_window = 50
 stock_data = calculate_moving_averages(stock_data, short_window, long_window)
 signals = generate_signals(stock_data)
 
-def plot_strategy(data, signals):
+def calculate_success_rate(data, signals):
+    # Add shifted closing price data to the signals DataFrame
+    signals['Shifted_Close'] = data['Close'].shift(-1)
+
+    # Calculate whether the stock price increased or decreased
+    signals['Actual_Change'] = np.where(signals['Shifted_Close'] > data['Close'], 1, 0)
+
+    # Calculate the number of correct predictions
+    correct_predictions = (signals['Signal'] == signals['Actual_Change']).sum()
+
+    # Calculate the success rate
+    success_rate = correct_predictions / len(signals)
+
+    return success_rate
+
+success_rate = calculate_success_rate(stock_data, signals)
+
+def plot_strategy(data, signals, success_rate):
     fig, ax1 = plt.subplots(figsize=(12, 8))
 
     # Plot stock closing price and moving averages
@@ -48,9 +66,9 @@ def plot_strategy(data, signals):
     ax1.plot(signals.loc[signals['Positions'] == -1].index, data['Close'][signals['Positions'] == -1], 'v', markersize=10, color='r', label='Sell signal')
 
     ax1.set_ylabel('Price')
-    ax1.set_title(ticker +' Stock Price, Moving Averages & Buy/Sell Signals')
+    ax1.set_title('Stock Price, Moving Averages & Buy/Sell Signals\nPrediction Success Rate: {:.2%}'.format(success_rate))
     ax1.legend(loc='best')
     plt.xlabel('Date')
     plt.show()
 
-plot_strategy(stock_data, signals)
+plot_strategy(stock_data, signals, success_rate)
