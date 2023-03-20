@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import plotly.graph_objects as go
 from datetime import datetime
 
-def fetch_stock_data(ticker, start_date, end_date):
+def get_stock_data(ticker, start_date, end_date):
     stock_data = yf.download(ticker, start=start_date, end=end_date)
     return stock_data
 
@@ -13,7 +13,7 @@ ticker = 'AMZN'  # You can replace this with any stock symbol you prefer
 start_date = datetime(1900, 1, 1)  # Change the start date to January 1, 1900
 end_date = datetime.now()
 
-stock_data = fetch_stock_data(ticker, start_date, end_date)
+stock_data = get_stock_data(ticker, start_date, end_date)
 
 def calculate_moving_averages(data, short_window, long_window):
     data['Short_MA'] = data['Close'].rolling(window=short_window).mean()
@@ -49,7 +49,6 @@ def calculate_success_rate(data, signals):
     success_rate = correct_predictions / len(signals)
 
     return success_rate
-
 success_rate = calculate_success_rate(stock_data, signals)
 
 def plot_strategy(data, signals, success_rate):
@@ -67,7 +66,7 @@ def plot_strategy(data, signals, success_rate):
     ax1.plot(signals.loc[signals['Positions'] == -1].index, data['Close'][signals['Positions'] == -1], 'v', markersize=10, color='r', label='Sell signal')
 
     ax1.set_ylabel('Price')
-    ax1.set_title(ticker +' Stock Price, Moving Averages & Buy/Sell Signals\nPrediction Success Rate: {:.2%}'.format(success_rate))
+    ax1.set_title(ticker+' Stock Price, Moving Averages & Buy/Sell Signals\nPrediction Success Rate: {:.2%}'.format(success_rate))
     ax1.legend(loc='best')
     plt.xlabel('Date')
     plt.show()
